@@ -46,13 +46,33 @@ def web_scraping(url, test_type, credentials_or_search_term, file_name):
                 search_bar.send_keys(Keys.RETURN)
                 print("Se completo la busqueda")
                 time.sleep(3)
-                hyperlinks = driver.find_elements(By.TAG_NAME, "a")
-                for hyperlink in hyperlinks:
-                    if hyperlink.text == "Broquel Bolita Perla Cultivada Blanca 10mm Con Poste Plata Color Blanco":
-                        hyperlink.click()
-                        print("se dio click al hyperlink deseado")
-                
-                
+
+                hyperlink_text = "Arracada De Tubo Lisa 20 Mm Diametro En Plata .925 Tam 5"
+                hyperlink_found = False
+                scroll_attempts = 0
+
+                # Scroll and search for the hyperlink
+                while not hyperlink_found and scroll_attempts < 20:  # Limiting the number of scroll attempts to avoid infinite loop
+                    try:
+                        hyperlinks = driver.find_elements(By.TAG_NAME, "a")
+                        for hyperlink in hyperlinks:
+                            if hyperlink.text == hyperlink_text:
+                                time.sleep(3)
+                                driver.execute_script("arguments[0].scrollIntoView();", hyperlink)
+                                hyperlink.click()
+                                print("Clicked the desired hyperlink")
+                                hyperlink_found = True
+                                break
+                        if not hyperlink_found:
+                            driver.execute_script("window.scrollBy(0, 1000);")
+                            scroll_attempts += 1
+                    except Exception as e:
+                        print(f"Error while searching for the hyperlink: {e}")
+                        break
+
+                if not hyperlink_found:
+                    print("Hyperlink not found after several attempts of scrolling")
+
                 time.sleep(3)
                 
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
